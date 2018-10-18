@@ -10,7 +10,10 @@ describe 'GithubFetcher' do
       include_labels: include_labels,
       exclude_titles: exclude_titles,
       exclude_repos: exclude_repos,
-      include_repos: include_repos
+      include_repos: include_repos,
+      fetch_comment_counts: fetch_comment_counts,
+      fetch_thumbs_up: fetch_thumbs_up,
+      fetch_approval_status: fetch_approval_status
     }
 
     GithubFetcher.new(options)
@@ -68,6 +71,9 @@ describe 'GithubFetcher' do
   let(:exclude_titles) { nil }
   let(:exclude_repos) { nil }
   let(:include_repos) { nil }
+  let(:fetch_approval_status) { true }
+  let(:fetch_comment_counts) { true }
+  let(:fetch_thumbs_up) { true }
   let(:team_members_accounts) { %w(binaryberry boffbowsh jackscotti tekin elliotcm tommyp mattbostock) }
   let(:pull_2266) do
     double(Sawyer::Resource,

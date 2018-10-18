@@ -58,16 +58,22 @@ class Seal
       exclude_titles = config['exclude_titles']
       exclude_repos = config['exclude_repos']
       include_repos = config['include_repos']
+      fetch_approval_status = value_or_default(config['fetch_approval_status'], true)
+      fetch_comment_counts = value_or_default(config['fetch_comment_counts'], true)
+      fetch_thumbs_up = value_or_default(config['fetch_thumbs_up'], true)
       @quotes = config['quotes']
     else
-      members = ENV['GITHUB_MEMBERS'] ? ENV['GITHUB_MEMBERS'].split(',') : []
-      use_labels = ENV['GITHUB_USE_LABELS'] ? ENV['GITHUB_USE_LABELS'].split(',') : nil
-      exclude_labels = ENV['GITHUB_EXCLUDE_LABELS'] ? ENV['GITHUB_EXCLUDE_LABELS'].split(',') : nil
-      include_labels = ENV['GITHUB_INCLUDE_LABELS'] ? ENV['GITHUB_INCLUDE_LABELS'].split(',') : nil
-      exclude_titles = ENV['GITHUB_EXCLUDE_TITLES'] ? ENV['GITHUB_EXCLUDE_TITLES'].split(',') : nil
-      exclude_repos = ENV['GITHUB_EXCLUDE_REPOS'] ? ENV['GITHUB_EXCLUDE_REPOS'].split(',') : nil
-      include_repos = ENV['GITHUB_INCLUDE_REPOS'] ? ENV['GITHUB_INCLUDE_REPOS'].split(',') : nil
-      @quotes = ENV['SEAL_QUOTES'] ? ENV['SEAL_QUOTES'].split(',') : nil
+      members = split_by_comma(ENV['GITHUB_MEMBERS']) || []
+      use_labels = ENV['GITHUB_USE_LABELS']
+      exclude_labels = split_by_comma(ENV['GITHUB_EXCLUDE_LABELS'])
+      include_labels = split_by_comma(ENV['GITHUB_INCLUDE_LABELS'])
+      exclude_titles = split_by_comma(ENV['GITHUB_EXCLUDE_TITLES'])
+      exclude_repos = split_by_comma(ENV['GITHUB_EXCLUDE_REPOS'])
+      include_repos = split_by_comma(ENV['GITHUB_INCLUDE_REPOS'])
+      fetch_approval_status = booleanize(ENV['GITHUB_FETCH_APPROVAL_STATUS'], true)
+      fetch_comment_counts = booleanize(ENV['GITHUB_FETCH_COMMENT_COUNTS'], true)
+      fetch_thumbs_up = booleanize(ENV['GITHUB_FETCH_THUMBS_UP'], true)
+      @quotes = split_by_comma(ENV['SEAL_QUOTES'])
     end
 
     if @mode == nil
@@ -78,7 +84,10 @@ class Seal
         include_labels: include_labels,
         exclude_titles: exclude_titles,
         exclude_repos: exclude_repos,
-        include_repos: include_repos
+        include_repos: include_repos,
+        fetch_approval_status: fetch_approval_status,
+        fetch_comment_counts: fetch_comment_counts,
+        fetch_thumbs_up: fetch_thumbs_up
       }
 
       fetch_from_github(options)
@@ -87,7 +96,6 @@ class Seal
     end
   end
 
-
   def fetch_from_github(options)
     git = GithubFetcher.new(options)
     git.list_pull_requests
@@ -95,5 +103,26 @@ class Seal
 
   def team_config(team)
     org_config[team] if org_config
+  end
+
+  def split_by_comma(string)
+    string.split(',') if string
+  end
+
+  def booleanize(string, default)
+    return default unless string
+
+    case string.downcase
+    when "true"
+      true
+    when "false"
+      false
+    else
+      default
+    end
+  end
+
+  def value_or_default(value, default)
+    value ? value : default
   end
 end

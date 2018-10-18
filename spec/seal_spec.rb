@@ -34,7 +34,10 @@ describe Seal do
       include_labels: nil,
       exclude_titles: nil,
       exclude_repos: nil,
-      include_repos: nil
+      include_repos: nil,
+      fetch_approval_status: true,
+      fetch_comment_counts: true,
+      fetch_thumbs_up: true
     }
   end
 

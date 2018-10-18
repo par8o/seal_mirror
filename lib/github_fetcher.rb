@@ -12,8 +12,8 @@ class GithubFetcher
     @github.api_endpoint = ENV['GITHUB_API_ENDPOINT'] if ENV['GITHUB_API_ENDPOINT']
     @github.user.login
     @github.auto_paginate = true
+    @options = options
     @people = options[:team_members_accounts]
-    @use_labels = options[:use_labels]
     @exclude_labels = normalize_labels(options[:exclude_labels])
     @include_labels = normalize_labels(options[:include_labels])
     @exclude_titles = normalize_labels(options[:exclude_titles])
@@ -32,7 +32,7 @@ class GithubFetcher
 
   private
 
-  attr_reader :use_labels, :exclude_labels, :include_labels, :exclude_titles, :exclude_repos, :include_repos
+  attr_reader :options, :use_labels, :exclude_labels, :include_labels, :exclude_titles, :exclude_repos, :include_repos
 
   def present_pull_request(pull_request, repo_name)
     pr = {}
@@ -40,9 +40,9 @@ class GithubFetcher
     pr['link'] = pull_request.html_url
     pr['author'] = pull_request.user.login
     pr['repo'] = repo_name
-    pr['comments_count'] = count_comments(pull_request, repo_name)
-    pr['thumbs_up'] = count_thumbs_up(pull_request, repo_name)
-    pr['approved'] = approved?(pull_request, repo_name)
+    pr['comments_count'] = count_comments(pull_request, repo_name) if fetch_comment_counts?
+    pr['thumbs_up'] = count_thumbs_up(pull_request, repo_name) if fetch_thumbs_up?
+    pr['approved'] = approved?(pull_request, repo_name) if fetch_approval_status?
     pr['updated'] = Date.parse(pull_request.updated_at.to_s)
     pr['labels'] = labels(pull_request, repo_name)
     pr
@@ -75,7 +75,7 @@ class GithubFetcher
   end
 
   def labels(pull_request, repo)
-    return [] unless use_labels
+    return [] unless options[:use_labels]
     key = "#{ORGANISATION}/#{repo}/#{pull_request.number}".to_sym
     @labels[key] ||= @github.labels_for_issue("#{ORGANISATION}/#{repo}", pull_request.number)
   end
@@ -117,5 +117,17 @@ class GithubFetcher
 
   def normalize_labels(labels)
     labels.map(&:downcase).uniq if labels
+  end
+
+  def fetch_comment_counts?
+    options[:fetch_comment_counts]
+  end
+
+  def fetch_approval_status?
+    options[:fetch_approval_status]
+  end
+
+  def fetch_thumbs_up?
+    options[:fetch_thumbs_up]
   end
 end
