@@ -6,6 +6,7 @@ describe 'GithubFetcher' do
     GithubFetcher.new(team_members_accounts,
                       use_labels,
                       exclude_labels,
+                      include_labels,
                       exclude_titles,
                       exclude_repos,
                       include_repos
@@ -60,6 +61,7 @@ describe 'GithubFetcher' do
     }
   end
   let(:exclude_labels) { nil }
+  let(:include_labels) { nil }
   let(:exclude_titles) { nil }
   let(:exclude_repos) { nil }
   let(:include_repos) { nil }
@@ -169,6 +171,32 @@ describe 'GithubFetcher' do
 
         expect(titles).not_to include 'Remove all Import-related code'
         expect(titles).to include '[FOR DISCUSSION ONLY] Remove Whitehall.case_study_preview_host'
+      end
+    end
+
+    context 'including nothing' do
+      it_behaves_like 'fetching from GitHub'
+    end
+
+    context 'including "WIP" label' do
+      let(:include_labels) { ['WIP'] }
+
+      it 'filters out anything but WIP' do
+        titles = github_fetcher.list_pull_requests.keys
+
+        expect(titles).to include 'Remove all Import-related code'
+        expect(titles).not_to include '[FOR DISCUSSION ONLY] Remove Whitehall.case_study_preview_host'
+      end
+    end
+
+    context 'including "wip" label' do
+      let(:include_labels) { ['wip'] }
+
+      it 'filters out anything but wip' do
+        titles = github_fetcher.list_pull_requests.keys
+
+        expect(titles).to include 'Remove all Import-related code'
+        expect(titles).not_to include '[FOR DISCUSSION ONLY] Remove Whitehall.case_study_preview_host'
       end
     end
 

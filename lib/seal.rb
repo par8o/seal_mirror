@@ -54,6 +54,7 @@ class Seal
       members = config['members']
       use_labels = config['use_labels']
       exclude_labels = config['exclude_labels']
+      include_labels = config['include_labels']
       exclude_titles = config['exclude_titles']
       exclude_repos = config['exclude_repos']
       include_repos = config['include_repos']
@@ -62,20 +63,22 @@ class Seal
       members = ENV['GITHUB_MEMBERS'] ? ENV['GITHUB_MEMBERS'].split(',') : []
       use_labels = ENV['GITHUB_USE_LABELS'] ? ENV['GITHUB_USE_LABELS'].split(',') : nil
       exclude_labels = ENV['GITHUB_EXCLUDE_LABELS'] ? ENV['GITHUB_EXCLUDE_LABELS'].split(',') : nil
+      include_labels = ENV['GITHUB_INCLUDE_LABELS'] ? ENV['GITHUB_INCLUDE_LABELS'].split(',') : nil
       exclude_titles = ENV['GITHUB_EXCLUDE_TITLES'] ? ENV['GITHUB_EXCLUDE_TITLES'].split(',') : nil
       exclude_repos = ENV['GITHUB_EXCLUDE_REPOS'] ? ENV['GITHUB_EXCLUDE_REPOS'].split(',') : nil
       include_repos = ENV['GITHUB_INCLUDE_REPOS'] ? ENV['GITHUB_INCLUDE_REPOS'].split(',') : nil
       @quotes = ENV['SEAL_QUOTES'] ? ENV['SEAL_QUOTES'].split(',') : nil
     end
-    return fetch_from_github(members, use_labels, exclude_labels, exclude_titles, exclude_repos, include_repos) if @mode == nil
+    return fetch_from_github(members, use_labels, exclude_labels, include_labels, exclude_titles, exclude_repos, include_repos) if @mode == nil
     @quotes
   end
 
 
-  def fetch_from_github(members, use_labels, exclude_labels, exclude_titles, exclude_repos, include_repos)
+  def fetch_from_github(members, use_labels, exclude_labels, include_labels, exclude_titles, exclude_repos, include_repos)
     git = GithubFetcher.new(members,
                             use_labels,
                             exclude_labels,
+                            include_labels,
                             exclude_titles,
                             exclude_repos,
                             include_repos

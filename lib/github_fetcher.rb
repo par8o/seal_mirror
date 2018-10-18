@@ -7,7 +7,7 @@ class GithubFetcher
 
   attr_accessor :people
 
-  def initialize(team_members_accounts, use_labels, exclude_labels, exclude_titles, exclude_repos, include_repos)
+  def initialize(team_members_accounts, use_labels, exclude_labels, include_labels, exclude_titles, exclude_repos, include_repos)
     @github = Octokit::Client.new(:access_token => ENV['GITHUB_TOKEN'])
     @github.api_endpoint = ENV['GITHUB_API_ENDPOINT'] if ENV['GITHUB_API_ENDPOINT']
     @github.user.login
@@ -15,6 +15,7 @@ class GithubFetcher
     @people = team_members_accounts
     @use_labels = use_labels
     @exclude_labels = exclude_labels.map(&:downcase).uniq if exclude_labels
+    @include_labels = include_labels.map(&:downcase).uniq if include_labels
     @exclude_titles = exclude_titles.map(&:downcase).uniq if exclude_titles
     @labels = {}
     @exclude_repos = exclude_repos
@@ -31,7 +32,7 @@ class GithubFetcher
 
   private
 
-  attr_reader :use_labels, :exclude_labels, :exclude_titles, :exclude_repos, :include_repos
+  attr_reader :use_labels, :exclude_labels, :include_labels, :exclude_titles, :exclude_repos, :include_repos
 
   def present_pull_request(pull_request, repo_name)
     pr = {}
@@ -84,6 +85,7 @@ class GithubFetcher
       excluded_label?(pull_request, repo) ||
       excluded_title?(pull_request.title) ||
       !person_subscribed?(pull_request) ||
+      (include_labels && !explicitly_included_label?(pull_request, repo)) ||
       (include_repos && !explicitly_included_repo?(repo))
   end
 
@@ -91,6 +93,12 @@ class GithubFetcher
     return false unless exclude_labels
     lowercase_label_names = labels(pull_request, repo).map { |l| l['name'].downcase }
     exclude_labels.any? { |e| lowercase_label_names.include?(e) }
+  end
+
+  def explicitly_included_label?(pull_request, repo)
+    return false unless include_labels
+    lowercase_label_names = labels(pull_request, repo).map { |l| l['name'].downcase }
+    include_labels.any? { |e| lowercase_label_names.include?(e) }
   end
 
   def excluded_title?(title)
