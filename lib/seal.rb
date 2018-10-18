@@ -4,6 +4,7 @@ require 'yaml'
 
 require './lib/github_fetcher.rb'
 require './lib/message_builder.rb'
+require './lib/par8o_message_builder.rb'
 require './lib/slack_poster.rb'
 
 # Entry point for the Seal!
@@ -32,8 +33,17 @@ class Seal
     end
   end
 
+  def message_builder_class
+    case ENV["SEAL_MESSAGE_BUILDER"]
+    when "par8o"
+      Par8oMessageBuilder
+    else
+      MessageBuilder
+    end
+  end
+
   def bark_at(team)
-    message_builder = MessageBuilder.new(team_params(team), @mode)
+    message_builder = message_builder_class.new(team_params(team), @mode)
     message = message_builder.build
     channel = ENV["SLACK_CHANNEL"] ? ENV["SLACK_CHANNEL"] : team_config(team)['channel']
     slack = SlackPoster.new(ENV['SLACK_WEBHOOK'], channel, message_builder.poster_mood)
