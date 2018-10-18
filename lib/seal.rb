@@ -69,20 +69,27 @@ class Seal
       include_repos = ENV['GITHUB_INCLUDE_REPOS'] ? ENV['GITHUB_INCLUDE_REPOS'].split(',') : nil
       @quotes = ENV['SEAL_QUOTES'] ? ENV['SEAL_QUOTES'].split(',') : nil
     end
-    return fetch_from_github(members, use_labels, exclude_labels, include_labels, exclude_titles, exclude_repos, include_repos) if @mode == nil
-    @quotes
+
+    if @mode == nil
+      options = {
+        team_members_accounts: members,
+        use_labels: use_labels,
+        exclude_labels: exclude_labels,
+        include_labels: include_labels,
+        exclude_titles: exclude_titles,
+        exclude_repos: exclude_repos,
+        include_repos: include_repos
+      }
+
+      fetch_from_github(options)
+    else
+      @quotes
+    end
   end
 
 
-  def fetch_from_github(members, use_labels, exclude_labels, include_labels, exclude_titles, exclude_repos, include_repos)
-    git = GithubFetcher.new(members,
-                            use_labels,
-                            exclude_labels,
-                            include_labels,
-                            exclude_titles,
-                            exclude_repos,
-                            include_repos
-                           )
+  def fetch_from_github(options)
+    git = GithubFetcher.new(options)
     git.list_pull_requests
   end
 

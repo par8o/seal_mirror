@@ -7,19 +7,19 @@ class GithubFetcher
 
   attr_accessor :people
 
-  def initialize(team_members_accounts, use_labels, exclude_labels, include_labels, exclude_titles, exclude_repos, include_repos)
+  def initialize(options)
     @github = Octokit::Client.new(:access_token => ENV['GITHUB_TOKEN'])
     @github.api_endpoint = ENV['GITHUB_API_ENDPOINT'] if ENV['GITHUB_API_ENDPOINT']
     @github.user.login
     @github.auto_paginate = true
-    @people = team_members_accounts
-    @use_labels = use_labels
-    @exclude_labels = exclude_labels.map(&:downcase).uniq if exclude_labels
-    @include_labels = include_labels.map(&:downcase).uniq if include_labels
-    @exclude_titles = exclude_titles.map(&:downcase).uniq if exclude_titles
+    @people = options[:team_members_accounts]
+    @use_labels = options[:use_labels]
+    @exclude_labels = normalize_labels(options[:exclude_labels])
+    @include_labels = normalize_labels(options[:include_labels])
+    @exclude_titles = normalize_labels(options[:exclude_titles])
     @labels = {}
-    @exclude_repos = exclude_repos
-    @include_repos = include_repos
+    @exclude_repos = options[:exclude_repos]
+    @include_repos = options[:include_repos]
   end
 
   def list_pull_requests
@@ -113,5 +113,9 @@ class GithubFetcher
   def explicitly_included_repo?(repo)
     return false unless include_repos
     include_repos.include?(repo)
+  end
+
+  def normalize_labels(labels)
+    labels.map(&:downcase).uniq if labels
   end
 end

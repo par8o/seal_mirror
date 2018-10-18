@@ -3,14 +3,17 @@ require './lib/github_fetcher'
 
 describe 'GithubFetcher' do
   subject(:github_fetcher) do
-    GithubFetcher.new(team_members_accounts,
-                      use_labels,
-                      exclude_labels,
-                      include_labels,
-                      exclude_titles,
-                      exclude_repos,
-                      include_repos
-                     )
+    options = {
+      team_members_accounts: team_members_accounts,
+      use_labels: use_labels,
+      exclude_labels: exclude_labels,
+      include_labels: include_labels,
+      exclude_titles: exclude_titles,
+      exclude_repos: exclude_repos,
+      include_repos: include_repos
+    }
+
+    GithubFetcher.new(options)
   end
 
   let(:fake_octokit_client) { double(Octokit::Client) }
