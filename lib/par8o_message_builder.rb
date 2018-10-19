@@ -59,7 +59,7 @@ class Par8oMessageBuilder
 
   def list_pull_requests
     message = @content.keys.each_with_index.map { |title, n| present(title, n + 1) }
-    "Hello team! \n\n Here are the pull requests that need to be reviewed today:\n\n#{message.join}"
+    "Hello team! \n\n Here are the pull requests that need attention today:\n\n#{message.join}"
   end
 
   def no_pull_requests
